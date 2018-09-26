@@ -7,4 +7,5 @@ guests:
   - { name: guest01, ip: 192.168.1.11/24 }
   - { name: guest02, ip: 192.168.1.12/24 }
   - { name: guest03, ip: 192.168.1.13/24 }
+host_gateway: ""
 guest_gateway: 192.168.1.1
