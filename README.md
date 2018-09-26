@@ -26,12 +26,9 @@ ansible-playbook -i playbook/env/hostonly/ -u root -v playbook/container-host.ym
 git clone https://github.com/nishimura/vagrant-systemd-nspawn.git host-debian9
 cd host-debian9
 
-source ./myenv-example-hostonly
+source myenv-example-localvm
 cp ~/.ssh/id_rsa.pub data/authorized_keys
-
-vagrant up
-
-ansible-playbook -i playbook/env/hostonly/ -u root -v playbook/container-host.yml
+ansible-playbook -i playbook/env/localvm -u root -v playbook/container-host.yml
 ```
 
 ## customize
