@@ -1,0 +1,3 @@
+---
+- import_playbook: container-host.yml
+  tags: [ container-host ]

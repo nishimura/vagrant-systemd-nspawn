@@ -1,0 +1,16 @@
+---
+- main: restart systemd-networkd
+  systemd:
+    name: systemd-networkd.service
+    enabled: yes
+    state: restarted
+    daemon_reload: yes
+  listen: systemd-networkd changed
+
+- name: enable systemd-nspawn for guests
+  systemd:
+    name: 'systemd-nspawn@{{item.name}}.service'
+    enabled: yes
+    state: started
+  with_items: '{{guests}}'
+  listen: "guest network changed"

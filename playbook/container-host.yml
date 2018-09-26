@@ -1,0 +1,8 @@
+---
+- hosts: container-host
+  roles:
+    - common
+    - container
+  vars:
+    host_name: "{{ lookup('env', 'VAGRANT_HOST_NAME') }}"
+    host_br_ip: "{{ lookup('env', 'VAGRANT_ETH1_IP') }}/24"

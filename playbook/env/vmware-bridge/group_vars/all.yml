@@ -1,0 +1,10 @@
+---
+short_host_name: "{{ host_name | regex_replace('\\..*$', '') }}"
+domain_name: "{{ host_name | regex_replace('^.*\\.', '') }}"
+dev_btrfs: /dev/sdb
+guest_dns: 10.0.2.3
+guests:
+  - { name: guest01, ip: 172.16.87.83/24 }
+  - { name: guest02, ip: 172.16.87.84/24 }
+  - { name: guest03, ip: 172.16.87.85/24 }
+guest_gateway: 172.16.87.2

@@ -1,0 +1,3 @@
+export VAGRANT_BRIDGE_DEV=vmnet8
+export VAGRANT_ETH1_IP=172.16.87.81
+export VAGRANT_HOST_NAME=host01.local.test

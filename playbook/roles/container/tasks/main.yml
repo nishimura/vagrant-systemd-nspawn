@@ -1,0 +1,158 @@
+---
+- name: present util packages for container
+  apt: name={{item}} state=present update_cache=yes
+  with_items:
+    - btrfs-progs
+    - systemd-container
+    - debootstrap
+  tags: [guest-init, btrfs]
+
+- name: present util packages for network
+  apt: name={{item}} state=present update_cache=yes
+  with_items:
+    - bridge-utils
+  tags: network
+
+
+- name: btrfs filesystem exists
+  filesystem:
+    fstype: btrfs
+    dev: "{{dev_btrfs}}"
+  tags: btrfs
+
+- name: mounted btrfs
+  mount:
+    path: /var/lib/machines
+    src: "{{dev_btrfs}}"
+    fstype: btrfs
+    state: mounted
+  tags: btrfs
+
+- name: run debootstrap
+  command: /usr/sbin/debootstrap stretch /root/init-stretch
+  args:
+    creates: /root/init-stretch
+  tags: guest-init
+
+- name: guest .ssh directory
+  file: path=/root/init-stretch/root/.ssh state=directory owner=root group=root mode=700
+  tags: guest-init
+
+- name: copy public key
+  copy:
+    src: ../../../../data/authorized_keys
+    dest: /root/init-stretch/root/.ssh/authorized_keys
+  tags: guest-init
+
+- name: archive guest image
+  archive:
+    path: /root/init-stretch/*
+    dest: /root/init-stretch.tar
+    format: tar
+  tags: guest-init
+
+- name: import guest image
+  command: /bin/machinectl import-tar /root/init-stretch.tar init-stretch
+  args:
+    creates: /var/lib/machines/init-stretch
+  tags: guest-init
+
+- name: check readonly initial guest image
+  shell: /bin/machinectl list-images | grep init-stretch | cut -d' ' -f3
+  register: res
+  failed_when: res.rc != 0
+  changed_when: res.rc != 0
+  tags: guest-init
+
+- name: readonly initial guest image
+  command: /bin/machinectl read-only init-stretch
+  when: res.stdout == 'no'
+  tags: guest-init
+
+- name: clone initial guest image
+  command: /bin/machinectl clone init-stretch '{{item.name}}'
+  args:
+    creates: '/var/lib/machines/{{item.name}}'
+  with_items: '{{guests}}'
+  tags: guests
+
+- name: init guests image
+  command: /usr/bin/systemd-nspawn -D '/var/lib/machines/{{item.name}}' apt-get install -y ssh
+  args:
+    creates: '/var/lib/machines/{{item.name}}/etc/ssh'
+  with_items: '{{guests}}'
+  tags: guests
+
+
+- name: guests hostname
+  template:
+    src: hostname
+    dest: '/var/lib/machines/{{item.name}}/etc/hostname'
+    owner: root
+    group: root
+    mode: 644
+  with_items: '{{guests}}'
+  tags: [hostname, guests]
+
+- name: guests hosts file
+  template:
+    src: hosts
+    dest: '/var/lib/machines/{{item.name}}/etc/hosts'
+    owner: root
+    group: root
+    mode: 644
+  with_items: '{{guests}}'
+  tags: [hostname, guests]
+
+- name: guests systemd-networkd
+  command: /usr/bin/systemd-nspawn -D '/var/lib/machines/{{item.name}}' /bin/systemctl enable systemd-networkd
+  args:
+    creates: '/var/lib/machines/{{item.name}}/etc/systemd/system/multi-user.target.wants/systemd-networkd.service'
+  with_items: '{{guests}}'
+  tags: guests
+
+
+- name: copy host network settings
+  copy: src='{{item}}' dest="/etc/systemd/network/{{item}}" mode=0644
+  with_items:
+    - br0.netdev
+    - eth.network
+  notify: systemd-networkd changed
+  tags: network
+
+- name: present bridge ip address
+  template:
+    src: br0.network.j2
+    dest: /etc/systemd/network/br0.network
+    owner: root
+    group: root
+    mode: 644
+  notify: systemd-networkd changed
+  tags: network
+
+
+- name: disable default guest network
+  file:
+    src: /dev/null
+    dest: '/var/lib/machines/{{item.name}}/etc/systemd/network/80-container-host0.network'
+    state: link
+  with_items: '{{guests}}'
+  notify: "guest network changed"
+  tags: guests
+
+- name: present guest ip address
+  template:
+    src: guest.network.j2
+    dest: '/var/lib/machines/{{item.name}}/etc/systemd/network/host0.network'
+    owner: root
+    group: root
+    mode: 644
+  with_items: '{{guests}}'
+  notify: "guest network changed"
+  tags: guests
+
+- name: guests systemd-nspawn service
+  copy: src=systemd-nspawn@.service dest='/etc/systemd/system/systemd-nspawn@{{item.name}}.service'
+  with_items: '{{guests}}'
+  notify: systemd-networkd changed
+  tags: guests
