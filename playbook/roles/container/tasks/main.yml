@@ -116,6 +116,17 @@
   copy: src='{{item}}' dest="/etc/systemd/network/{{item}}" mode=0644
   with_items:
     - br0.netdev
+  notify: systemd-networkd changed
+  tags: network
+
+- name: copy host network settings2
+  template:
+    src: '{{item}}'
+    dest: "/etc/systemd/network/{{item}}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
     - eth.network
   notify: systemd-networkd changed
   tags: network

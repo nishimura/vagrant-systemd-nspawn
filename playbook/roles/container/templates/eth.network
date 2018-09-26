@@ -1,5 +1,5 @@
 [Match]
-Name=eth1
+Name={{ host_bridge_dev }}
 
 [Network]
 Bridge=br0

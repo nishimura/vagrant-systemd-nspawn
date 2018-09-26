@@ -9,3 +9,4 @@ guests:
   - { name: guest03, ip: 172.16.87.85/24 }
 host_gateway: ""
 guest_gateway: 172.16.87.2
+host_bridge_dev: eth1
