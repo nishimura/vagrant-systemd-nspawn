@@ -35,7 +35,7 @@
   tags: guest-init
 
 - name: guest .ssh directory
-  file: path=/root/init-stretch/root/.ssh state=directory owner=root group=root mode=700
+  file: path=/root/init-stretch/root/.ssh state=directory owner=root group=root mode=0700
   tags: guest-init
 
 - name: copy public key
