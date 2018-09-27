@@ -1,6 +1,6 @@
 ---
 short_host_name: "{{ host_name | regex_replace('\\..*$', '') }}"
-domain_name: "{{ host_name | regex_replace('^.*\\.', '') }}"
+domain_name: "{{ host_name | regex_replace('^[^.]*\\.', '') }}"
 dev_btrfs: /dev/sdb
 guest_dns: 172.16.87.101
 guests:
