@@ -90,7 +90,7 @@
     dest: '/var/lib/machines/{{item.name}}/etc/hostname'
     owner: root
     group: root
-    mode: 644
+    mode: 0644
   with_items: '{{guests}}'
   tags: [hostname, guests]
 
@@ -100,7 +100,7 @@
     dest: '/var/lib/machines/{{item.name}}/etc/hosts'
     owner: root
     group: root
-    mode: 644
+    mode: 0644
   with_items: '{{guests}}'
   tags: [hostname, guests]
 
@@ -146,7 +146,7 @@
     dest: /etc/systemd/network/br0.network
     owner: root
     group: root
-    mode: 644
+    mode: 0644
   notify: systemd-networkd changed
   tags: network
 
@@ -166,7 +166,7 @@
     dest: '/var/lib/machines/{{item.name}}/etc/systemd/network/host0.network'
     owner: root
     group: root
-    mode: 644
+    mode: 0644
   with_items: '{{guests}}'
   notify: "started systemd-nspawn"
   tags: guests
@@ -177,7 +177,7 @@
     dest: '/var/lib/machines/{{item.name}}/etc/resolv.conf'
     owner: root
     group: root
-    mode: 644
+    mode: 0644
   with_items: '{{guests}}'
   notify: "started systemd-nspawn"
   tags: guests
