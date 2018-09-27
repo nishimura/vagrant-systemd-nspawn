@@ -7,7 +7,7 @@
   tags: [guest-init, btrfs]
 
 - name: present systemd-container packages in backports release
-  apt: name={{item}} state=present update_cache=yes default_release=stretch-backports
+  apt: name={{item}} state=latest update_cache=yes default_release=stretch-backports
   with_items:
     - systemd-container
   tags: [guest-init]
