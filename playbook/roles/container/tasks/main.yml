@@ -104,6 +104,15 @@
   with_items: '{{guests}}'
   tags: [hostname, guests]
 
+
+- name: guests python present
+  command: /usr/bin/systemd-nspawn -D '/var/lib/machines/{{item.name}}' apt-get install -y python
+  args:
+    creates: '/var/lib/machines/{{item.name}}/usr/bin/python'
+  notify: "started systemd-nspawn"
+  with_items: '{{guests}}'
+  tags: guests
+
 - name: guests systemd-networkd
   command: /usr/bin/systemd-nspawn -D '/var/lib/machines/{{item.name}}' /bin/systemctl enable systemd-networkd
   args:
@@ -148,7 +157,7 @@
     dest: '/var/lib/machines/{{item.name}}/etc/systemd/network/80-container-host0.network'
     state: link
   with_items: '{{guests}}'
-  notify: "guest network changed"
+  notify: "started systemd-nspawn"
   tags: guests
 
 - name: present guest ip address
@@ -159,7 +168,18 @@
     group: root
     mode: 644
   with_items: '{{guests}}'
-  notify: "guest network changed"
+  notify: "started systemd-nspawn"
+  tags: guests
+
+- name: present guest resolv.conf
+  template:
+    src: guest.resolv.conf.j2
+    dest: '/var/lib/machines/{{item.name}}/etc/resolv.conf'
+    owner: root
+    group: root
+    mode: 644
+  with_items: '{{guests}}'
+  notify: "started systemd-nspawn"
   tags: guests
 
 - name: guests systemd-nspawn service

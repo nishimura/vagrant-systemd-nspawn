@@ -13,4 +13,4 @@
     enabled: yes
     state: started
   with_items: '{{guests}}'
-  listen: "guest network changed"
+  listen: "started systemd-nspawn"
