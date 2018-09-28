@@ -6,8 +6,18 @@
     - debootstrap
   tags: [guest-init, btrfs]
 
+- name: add backports repository
+  copy:
+    src: backports.list
+    dest: /etc/apt/sources.list.d/backports.list
+  tags: [guest-init]
+
 - name: present systemd-container packages in backports release
-  apt: name={{item}} state=latest update_cache=yes default_release=stretch-backports
+  apt:
+    name: "{{item}}"
+    state: latest
+    update_cache: yes
+    default_release: stretch-backports
   with_items:
     - systemd-container
   tags: [guest-init]
